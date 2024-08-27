@@ -109,18 +109,18 @@ public class MainActivity extends AppCompatActivity {
         TextView menuTotal = new TextView(this);
         menuTotal.setText("0 | 0");
         menuTotal.setTypeface(null, Typeface.BOLD);
+        menuTotal.setGravity(Gravity.END);
         menuTotal.setId(View.generateViewId());
 
         ConstraintLayout.LayoutParams menuTotalParams = new ConstraintLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
-        menuTotalParams.setMarginStart(8);
         menuTotalParams.topToTop = outLayout.getId();
         menuTotalParams.bottomToBottom = outLayout.getId();
 
-        menuNameParams.leftToLeft = outLayout.getId();
-        menuKurangParams.leftToRight = menuName.getId();
-        menuTambahParams.leftToRight = menuKurang.getId();
-        menuTotalParams.rightToRight = outLayout.getId();
-        menuTotalParams.setMarginEnd(20);
+        menuNameParams.startToStart = outLayout.getId();
+        menuKurangParams.startToEnd = menuName.getId();
+        menuTambahParams.startToEnd = menuKurang.getId();
+        menuTotalParams.endToEnd = outLayout.getId();
+        menuTotalParams.setMarginEnd((int) (8 * dpCoeficient));
 
         menuName.setLayoutParams(menuNameParams);
         menuKurang.setLayoutParams(menuKurangParams);
