@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         qtyList = new int[menuSize];
         for(int i = 0; i < menuSize; i++){
             if (i == 0){
-                temp = buildBlock(R.id.kupatset, name[i], harga[i], true, i);
+                temp = buildBlock(R.id.header2, name[i], harga[i], true, i);
             } else {
                 temp = buildBlock(temp.getId(), name[i], harga[i], true, i);
             }
