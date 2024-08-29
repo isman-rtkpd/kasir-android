@@ -57,6 +57,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/header2"
                 android:layout_width="match_parent"
@@ -68,28 +69,39 @@
                 app:layout_constraintTop_toBottomOf="@+id/header">
 
                 <Button
-                    android:id="@+id/print"
+                    android:id="@+id/menu_option"
                     android:layout_width="128dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:gravity="center"
-                    android:text="Print"
+                    android:text="Setting"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0" />
 
+                <Button
+                    android:id="@+id/print"
+                    android:layout_width="128dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Print"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/menu_option"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0" />
+
                 <TextView
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
                     android:id="@+id/totalharga"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="8dp"
                     android:text="0"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/gojekDetail"

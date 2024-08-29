@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,12 +29,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.anastaciocintra.escpos.EscPos;
 import com.github.anastaciocintra.escpos.EscPosConst;
 import com.github.anastaciocintra.escpos.Style;
+import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +46,7 @@ import java.util.Calendar;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     static int[] qtyList, harga;
     static int menuSize;
@@ -64,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     };
     private BluetoothDevice mBluetoothDevice;
     private BluetoothAdapter mBluetoothAdapter;
+
+    private Button settingButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,14 +102,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    PrintReceipt();
+                    printReceipt();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
         });
 
+
+        settingButton = findViewById(R.id.menu_option);
+        settingButton.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this, v);
+            popup.setOnMenuItemClickListener(this::onMenuItemClick);
+            popup.getMenuInflater().inflate(R.menu.main, popup.getMenu());
+            popup.show();
+        });
+        //registerForContextMenu(settingButton);
+
     }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_connect_printer) {
+            settingButton.setText("CONNECT PRINTER");
+            return true;
+        } else if (itemId == R.id.menu_update_price) {
+            settingButton.setText("UPDATE PRICE");
+            return true;
+        } else if (itemId == R.id.menu_clear_setting) {
+            settingButton.setText("CLEAR SETTING");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     private void calculateTotal() {
         TextView totalText = (TextView) findViewById(R.id.totalharga);
@@ -242,15 +274,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override // android.app.Activity
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.clear_setting) {
-            clearContent(0);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     // @Override // android.support.design.widget.NavigationView.OnNavigationItemSelectedListener
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -262,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
                 clearContent(1);
             } else if (id == R.id.nav_tools) {
                 attempDisconnect();
-                ScanBluetooth();
+                scanBluetooth();
             }
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -279,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Message", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                ListPairedDevices();
+                listPairedDevices();
                 Intent connectIntent = new Intent(this, (Class<?>) DeviceListActivity.class);
                 startActivityForResult(connectIntent, 1);
                 return;
@@ -307,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void ListPairedDevices() {
+    private void listPairedDevices() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -326,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void ScanBluetooth() {
+    public void scanBluetooth() {
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothAdapter bluetoothAdapter = this.mBluetoothAdapter;
         if (bluetoothAdapter != null) {
@@ -410,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
         return buffer.array();
     }
 
-    public boolean PrintReceipt() throws InterruptedException {
+    public boolean printReceipt() throws InterruptedException {
         if (this.mBluetoothSocket == null) {
             Toast.makeText(this, "Silakan hubungkan printer terlebih dahulu", Toast.LENGTH_SHORT).show();
             return false;
