@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/hargaBaruET"
+        android:layout_width="match_parent"
+        android:layout_height="128sp"
+        android:layout_margin="8dp"
+        android:hint="JSON"
+        android:singleLine="false" />
+
+    <Button
+        android:id="@+id/hargaBaruButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Update Harga" />
+
+    <Button
+        android:id="@+id/hargaBaruButtonCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Cancel" />
+
+    <EditText
+        android:id="@+id/hargaBaruRequestCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:hint="request code"
+        android:singleLine="false" />
+
+    <Button
+        android:id="@+id/hargaBaruButtonRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Request" />
+
+    <TextView
+        android:id="@+id/hargaBaruResponse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="response here" />
+</LinearLayout>

@@ -42,17 +42,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity {
 
     static int[] qtyList, harga;
     static int menuSize;
 
     private EscPos escpos;
     private UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    private List<TextView> harTot;
 
     protected static final String TAG = "TAG";
     private ProgressDialog mBluetoothConnectProgressDialog;
@@ -85,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         ConstraintLayout temp = new ConstraintLayout(this);
 
+        harTot = new ArrayList<>();
+
         qtyList = new int[menuSize];
         for (int i = 0; i < menuSize; i++) {
             if (i == 0) {
@@ -102,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 try {
+                    run();
+                    listPairedDevices();
                     printReceipt();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -121,16 +129,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+
     public boolean onMenuItemClick(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.menu_connect_printer) {
             settingButton.setText("CONNECT PRINTER");
+            attempDisconnect();
+            scanBluetooth();
             return true;
         } else if (itemId == R.id.menu_update_price) {
             settingButton.setText("UPDATE PRICE");
+            updateHarga();
             return true;
         } else if (itemId == R.id.menu_clear_setting) {
             settingButton.setText("CLEAR SETTING");
+            clearContent(1);
             return true;
         } else {
             return false;
@@ -203,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuTotal.setTypeface(null, Typeface.BOLD);
         menuTotal.setGravity(Gravity.END);
         menuTotal.setId(View.generateViewId());
+        harTot.add(menuTotal);
 
         ConstraintLayout.LayoutParams menuTotalParams = new ConstraintLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
         menuTotalParams.topToTop = outLayout.getId();
@@ -266,31 +280,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } catch (Exception e) {
             Log.e("Tag", "Exe ", e);
         }
-    }
-
-    @Override // android.app.Activity
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-
-    // @Override // android.support.design.widget.NavigationView.OnNavigationItemSelectedListener
-    public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id != R.id.nav_home && id != R.id.nav_slideshow) {
-            if (id == R.id.nav_ganti_harga) {
-                updateHarga();
-            } else if (id == R.id.nav_cek_harga) {
-                clearContent(1);
-            } else if (id == R.id.nav_tools) {
-                attempDisconnect();
-                scanBluetooth();
-            }
-        }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override // android.support.v4.app.FragmentActivity, android.app.Activity
@@ -414,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void clearContent(int num) {
         for (int i = 0; i < menuSize ; i++){
             qtyList[i] = 0;
+            harTot.get(i).setText("0 | 0");
         }
         calculateTotal();
     }

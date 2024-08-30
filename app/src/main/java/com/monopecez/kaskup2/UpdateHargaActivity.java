@@ -9,14 +9,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /* loaded from: classes2.dex */
 public class UpdateHargaActivity extends MainActivity {
@@ -26,72 +27,92 @@ public class UpdateHargaActivity extends MainActivity {
     static EditText jsonInput;
     static TextView jsonTVResponse;
 
+    static TextView jsonRequestCode;
+
     /* JADX INFO: Access modifiers changed from: protected */
     @Override // com.kupat.test.MainActivity, android.support.v7.app.AppCompatActivity, android.support.v4.app.FragmentActivity, android.support.v4.app.SupportActivity, android.app.Activity
     public void onCreate(Bundle mSavedInstanceState) {
         super.onCreate(mSavedInstanceState);
-//        setContentView(R.layout.update_harga);
-//        jsonInput = (EditText) findViewById(R.id.hargaBaruET);
-//        jsonButtonOk = (Button) findViewById(R.id.hargaBaruButton);
-//        jsonButtonCancel = (Button) findViewById(R.id.hargaBaruButtonCancel);
-//        jsonButtonRequest = (Button) findViewById(R.id.hargaBaruButtonRequest);
-//        jsonButtonOk.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.1
-//            @Override // android.view.View.OnClickListener
-//            public void onClick(View v) {
-//                System.out.println("YANG DIINPUT : " + UpdateHargaActivity.jsonInput.getText().toString());
-//                String jsonString = UpdateHargaActivity.jsonInput.getText().toString();
-//                if (jsonString.length() != 0) {
-//                    try {
-//                        new JSONObject(jsonString);
-//                        UpdateHargaActivity.this.parseJson(jsonString);
-//                        SharedPreferences sharedPref = UpdateHargaActivity.this.getSharedPreferences("pricesPreferences", 0);
-//                        SharedPreferences.Editor editor = sharedPref.edit();
-//                        if (sharedPref.getString("created", "").equals("OK")) {
-//                            editor.putString("created", "UPDATED");
-//                        }
-//                        editor.apply();
-//                        UpdateHargaActivity.this.finish();
-//                    } catch (JSONException e) {
-//                        Context context = UpdateHargaActivity.this.getApplicationContext();
-//                        Toast toast = Toast.makeText(context, "INVALID JSON", 0);
-//                        toast.show();
-//                        System.out.println(e);
-//                    }
-//                }
-//            }
-//        });
-//        jsonButtonCancel.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.2
-//            @Override // android.view.View.OnClickListener
-//            public void onClick(View v) {
-//                UpdateHargaActivity.this.finish();
-//            }
-//        });
-//        jsonButtonCancel.setOnLongClickListener(new View.OnLongClickListener() { // from class: com.kupat.test.UpdateHargaActivity.3
-//            @Override // android.view.View.OnLongClickListener
-//            public boolean onLongClick(View v) {
-//                UpdateHargaActivity.jsonInput.setText(MainActivity.defaultJson);
-//                return true;
-//            }
-//        });
-//        jsonButtonRequest.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.4
-//            @Override // android.view.View.OnClickListener
-//            public void onClick(View v) {
-//                final TextView textView = (TextView) UpdateHargaActivity.this.findViewById(R.id.hargaBaruResponse);
-//                RequestQueue queue = Volley.newRequestQueue(UpdateHargaActivity.this.getApplicationContext());
-//                StringRequest stringRequest = new StringRequest(0, "https://bookshelf-170600.appspot.com/harga", new Response.Listener<String>() { // from class: com.kupat.test.UpdateHargaActivity.4.1
-//                    @Override // com.android.volley.Response.Listener
-//                    public void onResponse(String response) {
-//                        textView.setText("Response is: " + response);
-//                        UpdateHargaActivity.jsonInput.setText(response);
-//                    }
-//                }, new Response.ErrorListener() { // from class: com.kupat.test.UpdateHargaActivity.4.2
-//                    @Override // com.android.volley.Response.ErrorListener
-//                    public void onErrorResponse(VolleyError error) {
-//                        textView.setText("That didn't work!");
-//                    }
-//                });
-//                queue.add(stringRequest);
-//            }
-//        });
+        setContentView(R.layout.update_harga);
+        jsonRequestCode = (TextView) findViewById(R.id.hargaBaruRequestCode);
+        jsonInput = (EditText) findViewById(R.id.hargaBaruET);
+        jsonTVResponse = (TextView) findViewById(R.id.hargaBaruResponse);
+        jsonButtonOk = (Button) findViewById(R.id.hargaBaruButton);
+        jsonButtonCancel = (Button) findViewById(R.id.hargaBaruButtonCancel);
+        jsonButtonRequest = (Button) findViewById(R.id.hargaBaruButtonRequest);
+        jsonButtonOk.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.1
+            @Override // android.view.View.OnClickListener
+            public void onClick(View v) {
+                System.out.println("YANG DIINPUT : " + UpdateHargaActivity.jsonInput.getText().toString());
+                String jsonString = UpdateHargaActivity.jsonInput.getText().toString();
+                if (jsonString.length() != 0) {
+                    try {
+                        new JSONObject(jsonString);
+                        String jsonRaw = "";
+                        SharedPreferences sharedPref = UpdateHargaActivity.this.getSharedPreferences("pricesPreferences", 0);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        if (sharedPref.getString("created", "").equals("OK")) {
+                            editor.putString("created", "UPDATED");
+                        }
+                        editor.apply();
+                        UpdateHargaActivity.this.finish();
+                    } catch (JSONException e) {
+                        Context context = UpdateHargaActivity.this.getApplicationContext();
+                        Toast toast = Toast.makeText(context, "INVALID JSON", Toast.LENGTH_SHORT);
+                        toast.show();
+                        System.out.println(e);
+                    }
+                }
+            }
+        });
+        jsonButtonCancel.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.2
+            @Override // android.view.View.OnClickListener
+            public void onClick(View v) {
+                UpdateHargaActivity.this.finish();
+            }
+        });
+        jsonButtonCancel.setOnLongClickListener(new View.OnLongClickListener() { // from class: com.kupat.test.UpdateHargaActivity.3
+            @Override // android.view.View.OnLongClickListener
+            public boolean onLongClick(View v) {
+                UpdateHargaActivity.jsonInput.setText("");
+                return true;
+            }
+        });
+        jsonButtonRequest.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.4
+            @Override // android.view.View.OnClickListener
+            public void onClick(View v) {
+                final TextView textView = (TextView) UpdateHargaActivity.this.findViewById(R.id.hargaBaruResponse);
+
+
+                Thread thread = new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            OkHttpClient client = new OkHttpClient();
+
+                            Request request = new Request.Builder()
+                                    .url("http://ourveins.id:8082/")
+                                    .build();
+                            Response response = client.newCall(request).execute();
+                            String reqCode = jsonRequestCode.getText().toString();
+                            String resp = reqCode + " | " + response.body().string().replace("\n", "");
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    jsonTVResponse.setText(resp);
+                                    jsonInput.setText(resp);
+                                }
+                            });
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                thread.start();
+            }
+        });
     }
 }
