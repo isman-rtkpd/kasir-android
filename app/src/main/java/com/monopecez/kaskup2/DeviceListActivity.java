@@ -25,31 +25,22 @@ public class DeviceListActivity extends Activity {
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() { // from class: com.kupat.test.DeviceListActivity.1
         @Override // android.widget.AdapterView.OnItemClickListener
         public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
-            try {
-                if (ActivityCompat.checkSelfPermission(DeviceListActivity.this.getApplicationContext(), android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                DeviceListActivity.this.mBluetoothAdapter.cancelDiscovery();
-                String mDeviceInfo = ((TextView) mView).getText().toString();
-                String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
-                Log.v(DeviceListActivity.TAG, "Device_Address " + mDeviceAddress);
-                Bundle mBundle = new Bundle();
-                mBundle.putString("DeviceAddress", mDeviceAddress);
-                Intent mBackIntent = new Intent();
-                mBackIntent.putExtras(mBundle);
-                DeviceListActivity.this.setResult(-1, mBackIntent);
-                Log.v(DeviceListActivity.TAG, "FINISHHHHHHHHHHHHHHHHHHHHHHHH");
-                DeviceListActivity.this.finish();
-            } catch (Exception e) {
-                Log.v(DeviceListActivity.TAG, "ERRORRRR");
+            if (ActivityCompat.checkSelfPermission(DeviceListActivity.this.getApplicationContext(), android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(DeviceListActivity.this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, 2);
             }
+            DeviceListActivity.this.mBluetoothAdapter.cancelDiscovery();
+            String mDeviceInfo = ((TextView) mView).getText().toString();
+            String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
+            Log.v(DeviceListActivity.TAG, "Device_Address " + mDeviceAddress);
+            Bundle mBundle = new Bundle();
+            mBundle.putString("DeviceAddress", mDeviceAddress);
+            Intent mBackIntent = new Intent();
+            mBackIntent.putExtras(mBundle);
+            DeviceListActivity.this.setResult(-1, mBackIntent);
+            Log.v(DeviceListActivity.TAG, "FINISHHHHHHHHHHHHHHHHHHHHHHHH");
+            DeviceListActivity.this.finish();
+            return;
+
         }
     };
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
@@ -58,6 +49,7 @@ public class DeviceListActivity extends Activity {
     protected void onCreate(Bundle mSavedInstanceState) {
         super.onCreate(mSavedInstanceState);
         requestWindowFeature(5);
+        System.out.println("DRAWING DEVICE LIST LAYOUT");
         setContentView(R.layout.device_list);
         setResult(0);
         this.mPairedDevicesArrayAdapter = new ArrayAdapter<>(this, R.layout.device_name);
@@ -65,17 +57,16 @@ public class DeviceListActivity extends Activity {
         mPairedListView.setAdapter((ListAdapter) this.mPairedDevicesArrayAdapter);
         mPairedListView.setOnItemClickListener(this.mDeviceClickListener);
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 2);
+
         }
+        // TODO: Consider calling
+        //    ActivityCompat#requestPermissions
+        System.out.println("SCANNING BLUETOOTH");
         Set<BluetoothDevice> mPairedDevices = this.mBluetoothAdapter.getBondedDevices();
+        System.out.println("PAIRED DEVICE SIZE: " + mPairedDevices.size());
         if (mPairedDevices.size() > 0) {
             findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
             for (BluetoothDevice mDevice : mPairedDevices) {
@@ -91,14 +82,8 @@ public class DeviceListActivity extends Activity {
         super.onDestroy();
         BluetoothAdapter bluetoothAdapter = this.mBluetoothAdapter;
         if (bluetoothAdapter != null) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, 2);
                 return;
             }
             bluetoothAdapter.cancelDiscovery();
