@@ -22,6 +22,8 @@ import java.util.Set;
 public class DeviceListActivity extends Activity {
     protected static final String TAG = "TAG";
     private BluetoothAdapter mBluetoothAdapter;
+    private ArrayAdapter<String> mPairedDevicesArrayAdapter;
+
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() { // from class: com.kupat.test.DeviceListActivity.1
         @Override // android.widget.AdapterView.OnItemClickListener
         public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
@@ -43,7 +45,6 @@ public class DeviceListActivity extends Activity {
 
         }
     };
-    private ArrayAdapter<String> mPairedDevicesArrayAdapter;
 
     @Override // android.app.Activity
     protected void onCreate(Bundle mSavedInstanceState) {

@@ -8,8 +8,8 @@ android {
 
     defaultConfig {
         applicationId = "com.monopecez.kaskup2"
-        minSdk = 28
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 

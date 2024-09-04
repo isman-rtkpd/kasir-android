@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -57,10 +58,12 @@ public class MainActivity extends AppCompatActivity {
     private UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private List<TextView> harTot;
+    private List<Integer> qtyTot;
 
     protected static final String TAG = "TAG";
     private ProgressDialog mBluetoothConnectProgressDialog;
     static AlertDialog.Builder builder;
+    TextView totalText;
     private BluetoothSocket mBluetoothSocket = null;
     private Handler mHandler = new Handler() { // from class: com.kupat.test.MainActivity.74
         @Override // android.os.Handler
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         String[] name = new String[]{"Kupat", "Kari", "Tahu"};
         harga = new int[]{10000, 20000, 200};
-
+        totalText = (TextView) findViewById(R.id.totalharga);
         menuSize = harga.length;
 
         setContentView(R.layout.activity_main);
@@ -90,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         ConstraintLayout temp = new ConstraintLayout(this);
 
         harTot = new ArrayList<>();
+        qtyTot = new ArrayList<>();
 
         qtyList = new int[menuSize];
         for (int i = 0; i < menuSize; i++) {
@@ -108,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    run();
-                    listPairedDevices();
                     printReceipt();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -152,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void calculateTotal() {
-        TextView totalText = (TextView) findViewById(R.id.totalharga);
         int total = 0;
         for (int i = 0; i < menuSize; i++) {
             total = total + (qtyList[i] * harga[i]);
@@ -304,36 +305,32 @@ public class MainActivity extends AppCompatActivity {
             Log.v(TAG, "Coming incoming address " + mDeviceAddress);
             this.mBluetoothDevice = this.mBluetoothAdapter.getRemoteDevice(mDeviceAddress);
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2);
+                Log.v(TAG, "MASUK KE IF BLOCK!!!!");
             }
-            this.mBluetoothConnectProgressDialog = ProgressDialog.show(this, "Connecting...", this.mBluetoothDevice.getName() + " : " + this.mBluetoothDevice.getAddress(), true, false);
+            Log.v(TAG, "SIAP SIAP CONNECT!!!!");
+
+            this.mBluetoothConnectProgressDialog = ProgressDialog.show(this, "Connecting...", this.mBluetoothDevice.getName() + " : " + this.mBluetoothDevice.getAddress(), true, true);
             Thread mBlutoothConnectThread = new Thread();
+            Log.v(TAG, "Starting thread!!!!");
             mBlutoothConnectThread.start();
+            Log.v(TAG, "Thread running!!!!");
+
+            run();
+
         }
     }
 
     private void listPairedDevices() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 2);
         }
-        Set<BluetoothDevice> mPairedDevices = this.mBluetoothAdapter.getBondedDevices();
-        if (mPairedDevices.size() > 0) {
-            for (BluetoothDevice mDevice : mPairedDevices) {
-                Log.v(TAG, "PairedDevices: " + mDevice.getName() + "  " + mDevice.getAddress());
+        if (this.mBluetoothAdapter != null){
+            Set<BluetoothDevice> mPairedDevices = this.mBluetoothAdapter.getBondedDevices();
+            if (mPairedDevices.size() > 0) {
+                for (BluetoothDevice mDevice : mPairedDevices) {
+                    Log.v(TAG, "PairedDevices: " + mDevice.getName() + "  " + mDevice.getAddress());
+                }
             }
         }
     }
@@ -372,22 +369,19 @@ public class MainActivity extends AppCompatActivity {
     public void run() {
         try {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 2);// TODO: Consider calling
                 return;
             }
             this.mBluetoothSocket = this.mBluetoothDevice.createRfcommSocketToServiceRecord(this.applicationUUID);
             this.mBluetoothAdapter.cancelDiscovery();
             this.mBluetoothSocket.connect();
             this.mHandler.sendEmptyMessage(0);
+            Log.d("Tag","BERHASIL KONEK GESS");
         } catch (IOException eConnectException) {
             Log.d(TAG, "CouldNotConnectToSocket", eConnectException);
             closeSocket(this.mBluetoothSocket);
+        } catch (Exception e){
+            Log.d(TAG, "ERROR: " + e);
         }
     }
 
@@ -424,14 +418,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean printReceipt() throws InterruptedException {
+        Log.d("TAG", "PRINTINGGGGGGG");
         if (this.mBluetoothSocket == null) {
+            Log.d("TAG", "PRINTINGGGGGGG NULLLLL");
+
             Toast.makeText(this, "Silakan hubungkan printer terlebih dahulu", Toast.LENGTH_SHORT).show();
             return false;
         }
+        Log.d("TAG", "blutoothsocket: " + this.mBluetoothSocket);
+
         Thread t = new Thread() { // from class: com.kupat.test.MainActivity.76
             @Override // java.lang.Thread, java.lang.Runnable
             public void run() {
                 try {
+
+                    Log.d("TAG", "START PRINT");
                     OutputStream os = MainActivity.this.mBluetoothSocket.getOutputStream();
                     MainActivity.this.escpos = new EscPos(os);
                     Style title = new Style().setFontSize(Style.FontSize._3, Style.FontSize._3).setJustification(EscPosConst.Justification.Center);
@@ -455,31 +456,35 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.escpos.writeLF(title2, "--------------------");
                     MainActivity.this.escpos.writeLF(title2, "Semoga sehat selalu");
                     MainActivity.this.escpos.feed(2);
+
+                    Log.d("TAG", "END PRINT");
                 } catch (Exception e) {
                     Log.e("MainActivity", "Exe ", e);
                 }
             }
         };
+        Log.d("TAG", "STARTING THREAD");
+
         t.start();
         t.join();
+        Log.d("TAG", "Thread END");
+
         return true;
     }
 
     public void ReceiptBuilder(EscPos escpos, boolean first) throws IOException {
-//        if (hargaTotal != 0) {
-//            Style rightJust = new Style().setJustification(EscPosConst.Justification.Right);
-//            if (nKupat != 0) {
-//                escpos.writeLF(nKupat + " x Kupat Tahu @" + this.hargaKupat1[priceIndex]);
-//                if (first) {
-//                    escpos.writeLF(rightJust, "" + totalHargaKupat);
-//                }
-//            }
-//            if (first) {
-//                escpos.writeLF(rightJust, "Total: " + hargaTotal);
-//            }
-//        }
+        String hargaTotal = totalText.getText().toString();
         Style rightJust = new Style().setJustification(EscPosConst.Justification.Right);
-        escpos.writeLF(rightJust, "Total: ");
+        if (!hargaTotal.equals("0")) {
+            for (int i = 0; i < menuSize; i++) {
+                escpos.writeLF(qtyList[i] + " x Kupat Tahu @" + harga[i]);
+                if (first) {
+                    escpos.writeLF(rightJust, "" + harga[i]);
+                }
+
+            }
+        }
+        escpos.writeLF(rightJust, "Total: " + "123000");
     }
 
     public void dialogClearReceipt() {
