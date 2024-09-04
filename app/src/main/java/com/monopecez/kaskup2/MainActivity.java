@@ -16,6 +16,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -39,6 +40,10 @@ import com.github.anastaciocintra.escpos.EscPosConst;
 import com.github.anastaciocintra.escpos.Style;
 import com.google.android.material.navigation.NavigationView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -51,14 +56,14 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    static int[] qtyList, harga;
+    static int[] qtyList, hargaList;
+    static String[] printNameList, nameList;
     static int menuSize;
 
     private EscPos escpos;
     private UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private List<TextView> harTot;
-    private List<Integer> qtyTot;
 
     protected static final String TAG = "TAG";
     private ProgressDialog mBluetoothConnectProgressDialog;
@@ -77,14 +82,19 @@ public class MainActivity extends AppCompatActivity {
 
     private Button settingButton;
 
+    private String defaultJson = "{\"nameList\": [\"kupat\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,300]}";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] name = new String[]{"Kupat", "Kari", "Tahu"};
-        harga = new int[]{10000, 20000, 200};
+        parseJson();
+
+        nameList = new String[]{"Kupat", "Kari", "Tahu"};
+        printNameList = new String[]{"Kupat", "Kari", "Tahu"}; // Max 10 chars
+        hargaList = new int[]{10000, 20000, 200};
         totalText = (TextView) findViewById(R.id.totalharga);
-        menuSize = harga.length;
+        menuSize = hargaList.length;
 
         setContentView(R.layout.activity_main);
 
@@ -93,14 +103,13 @@ public class MainActivity extends AppCompatActivity {
         ConstraintLayout temp = new ConstraintLayout(this);
 
         harTot = new ArrayList<>();
-        qtyTot = new ArrayList<>();
 
         qtyList = new int[menuSize];
         for (int i = 0; i < menuSize; i++) {
             if (i == 0) {
-                temp = buildBlock(R.id.header2, name[i], harga[i], true, i);
+                temp = buildBlock(R.id.header2, nameList[i], hargaList[i], true, i);
             } else {
-                temp = buildBlock(temp.getId(), name[i], harga[i], true, i);
+                temp = buildBlock(temp.getId(), nameList[i], hargaList[i], false, i);
             }
             mainConstraintLayout.addView(temp);
             qtyList[i] = 0;
@@ -156,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
     private void calculateTotal() {
         int total = 0;
         for (int i = 0; i < menuSize; i++) {
-            total = total + (qtyList[i] * harga[i]);
+            total = total + (qtyList[i] * hargaList[i]);
         }
         totalText.setText(String.valueOf(total));
     }
@@ -477,11 +486,12 @@ public class MainActivity extends AppCompatActivity {
         Style rightJust = new Style().setJustification(EscPosConst.Justification.Right);
         if (!hargaTotal.equals("0")) {
             for (int i = 0; i < menuSize; i++) {
-                escpos.writeLF(qtyList[i] + " x Kupat Tahu @" + harga[i]);
-                if (first) {
-                    escpos.writeLF(rightJust, "" + harga[i]);
+                if (qtyList[i] > 0) {
+                    escpos.writeLF(qtyList[i] + " x " + nameList[i] +" @" + hargaList[i]);
+                    if (first) {
+                        escpos.writeLF(rightJust, "" + (hargaList[i] * qtyList[i]));
+                    }
                 }
-
             }
         }
         escpos.writeLF(rightJust, "Total: " + "123000");
@@ -500,5 +510,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    public void parseJson(String text) {
+        SharedPreferences sharedPref = getSharedPreferences("pricesPreferences", 0);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        try {
+            JSONObject JSo = new JSONObject(text);
+            JSONArray temp = JSo.getJSONArray("hargaKupat1");
+            this.hargaKupat1 = new int[]{temp.getInt(0), temp.getInt(1), temp.getInt(2)};
+        } catch (JSONException e) {
+            System.out.println("PARSING ERRRPORRR");
+            Toast.makeText(getApplicationContext(), "WRONG JSON!! REVERT", Toast.LENGTH_SHORT);
+            editor.putString("created", "NOTOK");
+            parseJson(sharedPref.getString("jsonSebelum", defaultJson));
+            System.out.println(e);
+            editor.apply();
+        }
     }
 }
