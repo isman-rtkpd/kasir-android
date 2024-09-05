@@ -49,6 +49,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
@@ -90,13 +91,9 @@ public class MainActivity extends AppCompatActivity {
 
         parseJson();
 
-        nameList = new String[]{"Kupat", "Kari", "Tahu"};
-        printNameList = new String[]{"Kupat", "Kari", "Tahu"}; // Max 10 chars
-        hargaList = new int[]{10000, 20000, 200};
-        totalText = (TextView) findViewById(R.id.totalharga);
-        menuSize = hargaList.length;
-
         setContentView(R.layout.activity_main);
+
+        totalText = findViewById(R.id.totalharga);
 
         ConstraintLayout mainConstraintLayout = findViewById(R.id.mainConstraintLayout);
 
@@ -144,16 +141,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onMenuItemClick(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.menu_connect_printer) {
-            settingButton.setText("CONNECT PRINTER");
             attempDisconnect();
             scanBluetooth();
             return true;
         } else if (itemId == R.id.menu_update_price) {
-            settingButton.setText("UPDATE PRICE");
             updateHarga();
             return true;
         } else if (itemId == R.id.menu_clear_setting) {
-            settingButton.setText("CLEAR SETTING");
             clearContent(1);
             return true;
         } else {
@@ -167,6 +161,10 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < menuSize; i++) {
             total = total + (qtyList[i] * hargaList[i]);
         }
+        Log.d("calculate total", "MENU SIZE: " + menuSize);
+        Log.d("calculate total", "QTY LIST: " + Arrays.toString(qtyList));
+        Log.d("calculate total", "HARGA LIST: " + Arrays.toString(hargaList));
+        Log.d("calculate total", "TOTAL: " + total);
         totalText.setText(String.valueOf(total));
     }
 
@@ -512,18 +510,38 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void parseJson(String text) {
+    public void parseJson() {
+        defaultJson = "{\"nameList\": [\"kupatxxx\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,30000]}";
+        String text = defaultJson;
         SharedPreferences sharedPref = getSharedPreferences("pricesPreferences", 0);
         SharedPreferences.Editor editor = sharedPref.edit();
         try {
+            Log.d("TAG", "PARSING HARGAAAA");
             JSONObject JSo = new JSONObject(text);
-            JSONArray temp = JSo.getJSONArray("hargaKupat1");
-            this.hargaKupat1 = new int[]{temp.getInt(0), temp.getInt(1), temp.getInt(2)};
+            JSONArray tempName = JSo.getJSONArray("nameList");
+            JSONArray tempPrintName = JSo.getJSONArray("printNameList");
+            JSONArray tempHarga = JSo.getJSONArray("hargaList");
+            nameList = new String[tempName.length()];
+            printNameList = new String[tempName.length()];
+            hargaList = new int[tempName.length()];
+
+            for (int i = 0; i < tempName.length(); ++i) {
+                nameList[i] = tempName.getString(i);
+                printNameList[i] = tempPrintName.getString(i);
+                hargaList[i] = tempHarga.getInt(i);
+            }
+
+            System.out.println(Arrays.toString(nameList));
+            System.out.println(Arrays.toString(printNameList));
+            System.out.println(Arrays.toString(hargaList));
+            menuSize = hargaList.length;
+
+
         } catch (JSONException e) {
             System.out.println("PARSING ERRRPORRR");
             Toast.makeText(getApplicationContext(), "WRONG JSON!! REVERT", Toast.LENGTH_SHORT);
             editor.putString("created", "NOTOK");
-            parseJson(sharedPref.getString("jsonSebelum", defaultJson));
+            //parseJson(sharedPref.getString("jsonSebelum", defaultJson));
             System.out.println(e);
             editor.apply();
         }
