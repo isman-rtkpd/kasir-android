@@ -55,6 +55,7 @@ public class UpdateHargaActivity extends MainActivity {
                             editor.putString("created", "UPDATED");
                         }
                         editor.apply();
+                        parseJson();
                         UpdateHargaActivity.this.finish();
                     } catch (JSONException e) {
                         Context context = UpdateHargaActivity.this.getApplicationContext();
@@ -92,7 +93,7 @@ public class UpdateHargaActivity extends MainActivity {
                             OkHttpClient client = new OkHttpClient();
 
                             Request request = new Request.Builder()
-                                    .url("http://ourveins.id:8082/")
+                                    .url("http://ourveins.id:8082/get-harga?q=" + jsonRequestCode.getText().toString())
                                     .build();
                             Response response = client.newCall(request).execute();
                             String reqCode = jsonRequestCode.getText().toString();
