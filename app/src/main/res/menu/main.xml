@@ -4,13 +4,19 @@
         android:id="@+id/menu_connect_printer"
         android:visible="true"
         android:orderInCategory="100"
-        android:title="Connect Printer"
+        android:title="Hubungkan Printer"
         app:showAsAction="never"/>
     <item
         android:id="@+id/menu_update_price"
         android:visible="true"
         android:orderInCategory="100"
-        android:title="Update Price"
+        android:title="Update Harga"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_price_check"
+        android:visible="true"
+        android:orderInCategory="100"
+        android:title="Cek Harga"
         app:showAsAction="never"/>
     <item
         android:id="@+id/menu_clear_setting"

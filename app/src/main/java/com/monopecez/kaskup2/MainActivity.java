@@ -153,8 +153,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (itemId == R.id.menu_update_price) {
             updateHarga();
             return true;
-        } else if (itemId == R.id.menu_clear_setting) {
+        } else if (itemId == R.id.menu_price_check) {
             clearContent(1);
+            return true;
+        } else if (itemId == R.id.menu_clear_setting) {
+            clearContent(0);
             return true;
         } else {
             return false;
@@ -409,8 +412,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void clearContent(int num) {
         for (int i = 0; i < menuSize ; i++){
-            qtyList[i] = 0;
-            harTot.get(i).setText("0 | 0");
+            qtyList[i] = num;
+            harTot.get(i).setText(num + " | " + (num * hargaList[i]));
         }
         calculateTotal();
     }
