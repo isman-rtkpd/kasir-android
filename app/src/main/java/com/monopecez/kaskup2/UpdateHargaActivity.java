@@ -43,17 +43,17 @@ public class UpdateHargaActivity extends MainActivity {
         jsonButtonOk.setOnClickListener(new View.OnClickListener() { // from class: com.kupat.test.UpdateHargaActivity.1
             @Override // android.view.View.OnClickListener
             public void onClick(View v) {
-                System.out.println("YANG DIINPUT : " + UpdateHargaActivity.jsonInput.getText().toString());
-                String jsonString = UpdateHargaActivity.jsonInput.getText().toString();
+                System.out.println("YANG DIINPUT : " + jsonInput.getText().toString());
+                String jsonString = jsonInput.getText().toString();
                 if (jsonString.length() != 0) {
                     try {
                         new JSONObject(jsonString);
-                        String jsonRaw = "";
                         SharedPreferences sharedPref = UpdateHargaActivity.this.getSharedPreferences("pricesPreferences", 0);
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        if (sharedPref.getString("created", "").equals("OK")) {
-                            editor.putString("created", "UPDATED");
-                        }
+
+                        editor.putString("created", "UPDATED");
+                        editor.putString("jsonString", jsonString);
+
                         editor.apply();
                         parseJson();
                         UpdateHargaActivity.this.finish();
@@ -93,11 +93,11 @@ public class UpdateHargaActivity extends MainActivity {
                             OkHttpClient client = new OkHttpClient();
 
                             Request request = new Request.Builder()
-                                    .url("http://ourveins.id:8082/get-harga?q=" + jsonRequestCode.getText().toString())
+                                    .url("http://ourveins.id:8082/get-harga/" + jsonRequestCode.getText().toString())
                                     .build();
                             Response response = client.newCall(request).execute();
                             String reqCode = jsonRequestCode.getText().toString();
-                            String resp = reqCode + " | " + response.body().string().replace("\n", "");
+                            String resp = response.body().string().replace("\n", "");
 
                             runOnUiThread(new Runnable() {
                                 @Override

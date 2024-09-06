@@ -83,13 +83,19 @@ public class MainActivity extends AppCompatActivity {
 
     private Button settingButton;
 
-    private String defaultJson = "{\"nameList\": [\"kupat\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,300]}";
+    String defaultJson = "{\"nameList\": [\"kupat\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,300]}";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        parseJson();
+        defaultJson = "{\"nameList\": [\"kupatxxx\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,30000]}";
+
+        try {
+            parseJson();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -510,14 +516,14 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void parseJson() {
-        defaultJson = "{\"nameList\": [\"kupatxxx\", \"kari\", \"lontong\"], \"printNameList\": [\"kupat\", \"kari\", \"lontong\"], \"hargaList\": [100,200,30000]}";
-        String text = defaultJson;
+    public void parseJson() throws JSONException{
         SharedPreferences sharedPref = getSharedPreferences("pricesPreferences", 0);
         SharedPreferences.Editor editor = sharedPref.edit();
+        String menuJson = sharedPref.getString("jsonString", defaultJson);
+        Log.d("TAG", menuJson);
         try {
             Log.d("TAG", "PARSING HARGAAAA");
-            JSONObject JSo = new JSONObject(text);
+            JSONObject JSo = new JSONObject(menuJson);
             JSONArray tempName = JSo.getJSONArray("nameList");
             JSONArray tempPrintName = JSo.getJSONArray("printNameList");
             JSONArray tempHarga = JSo.getJSONArray("hargaList");
@@ -531,19 +537,35 @@ public class MainActivity extends AppCompatActivity {
                 hargaList[i] = tempHarga.getInt(i);
             }
 
-            System.out.println(Arrays.toString(nameList));
-            System.out.println(Arrays.toString(printNameList));
-            System.out.println(Arrays.toString(hargaList));
             menuSize = hargaList.length;
 
 
         } catch (JSONException e) {
+            JSONObject JSo = new JSONObject(menuJson);
+
+            JSONArray tempName = JSo.getJSONArray("nameList");
+            JSONArray tempPrintName = JSo.getJSONArray("printNameList");
+            JSONArray tempHarga = JSo.getJSONArray("hargaList");
+
+            nameList = new String[tempName.length()];
+            printNameList = new String[tempName.length()];
+            hargaList = new int[tempName.length()];
+
+            for (int i = 0; i < tempName.length(); ++i) {
+                nameList[i] = tempName.getString(i);
+                printNameList[i] = tempPrintName.getString(i);
+                hargaList[i] = tempHarga.getInt(i);
+            }
+            menuSize = hargaList.length;
+
+
             System.out.println("PARSING ERRRPORRR");
             Toast.makeText(getApplicationContext(), "WRONG JSON!! REVERT", Toast.LENGTH_SHORT);
-            editor.putString("created", "NOTOK");
-            //parseJson(sharedPref.getString("jsonSebelum", defaultJson));
+            editor.putString("jsonString", defaultJson);
+
             System.out.println(e);
-            editor.apply();
         }
+        editor.apply();
+
     }
 }
