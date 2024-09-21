@@ -5,6 +5,7 @@ import androidx.constraintlayout.motion.widget.Debug;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -47,6 +48,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -174,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("calculate total", "QTY LIST: " + Arrays.toString(qtyList));
         Log.d("calculate total", "HARGA LIST: " + Arrays.toString(hargaList));
         Log.d("calculate total", "TOTAL: " + total);
-        totalText.setText(String.valueOf(total));
+        totalText.setText(String.valueOf(formatNumber(total)));
     }
 
     private ConstraintLayout buildBlock(int beforeComponent, String menuNameInput, int harga, boolean isEven, int idx) {
@@ -264,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int qty = qtyList[idx] + 1;
                 qtyList[idx] = qty;
-                menuTotal.setText(qty + " | " + (qty * harga));
+                menuTotal.setText(qty + " | " + formatNumber(qty * harga));
                 calculateTotal();
             }
         });
@@ -277,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                     qty--;
                 }
                 qtyList[idx] = qty;
-                menuTotal.setText(qty + " | " + (qty * harga));
+                menuTotal.setText(qty + " | " + formatNumber(qty * harga));
                 calculateTotal();
             }
         });
@@ -320,10 +322,22 @@ public class MainActivity extends AppCompatActivity {
             String mDeviceAddress = mExtra.getString("DeviceAddress");
             Log.v(TAG, "Coming incoming address " + mDeviceAddress);
             this.mBluetoothDevice = this.mBluetoothAdapter.getRemoteDevice(mDeviceAddress);
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2);
-                Log.v(TAG, "MASUK KE IF BLOCK!!!!");
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG, "MASUK 1");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH}, 1);
+            } else if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 2);
+                Log.v(TAG, "MASUK 2");
+            } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG, "MASUK 3");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 3);
+            } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG, "MASUK 4");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_SCAN}, 4);
+            } else {
+                Log.v(TAG, "MASUK AMAN");
             }
+
             Log.v(TAG, "SIAP SIAP CONNECT!!!!");
 
             this.mBluetoothConnectProgressDialog = ProgressDialog.show(this, "Connecting...", this.mBluetoothDevice.getName() + " : " + this.mBluetoothDevice.getAddress(), true, true);
@@ -384,12 +398,13 @@ public class MainActivity extends AppCompatActivity {
     //@Override // java.lang.Runnable
     public void run() {
         try {
+            Log.d(TAG, "INSIDE RUNNING");
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 2);// TODO: Consider calling
-                return;
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 1);// TODO: Consider calling
             }
             this.mBluetoothSocket = this.mBluetoothDevice.createRfcommSocketToServiceRecord(this.applicationUUID);
             this.mBluetoothAdapter.cancelDiscovery();
+            Log.d(TAG, "CONNECTING IN THE RUN");
             this.mBluetoothSocket.connect();
             this.mHandler.sendEmptyMessage(0);
             Log.d("Tag","BERHASIL KONEK GESS");
@@ -456,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.escpos.writeLF(title, "KUPAT TAHU");
                     MainActivity.this.escpos.writeLF(title, "LONTONG KARI");
                     Style title2 = new Style().setJustification(EscPosConst.Justification.Center);
-                    MainActivity.this.escpos.writeLF(title2, "CICENDO - 1967 | 085108253545");
+                    MainActivity.this.escpos.writeLF(title2, "CICENDO - 1967 | 081321391963");
                     MainActivity.this.escpos.writeLF(title2, "--------------------");
                     MainActivity.this.escpos.writeLF("A/N: -");
                     MainActivity.this.escpos.writeLF("No : -");
@@ -571,4 +586,10 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
 
     }
+
+    public static String formatNumber(int value) {
+        DecimalFormat df = new DecimalFormat("###,###,###");
+        return df.format(value);
+    }
+
 }

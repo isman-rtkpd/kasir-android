@@ -30,6 +30,7 @@ public class DeviceListActivity extends Activity {
             if (ActivityCompat.checkSelfPermission(DeviceListActivity.this.getApplicationContext(), android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(DeviceListActivity.this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, 2);
             }
+
             DeviceListActivity.this.mBluetoothAdapter.cancelDiscovery();
             String mDeviceInfo = ((TextView) mView).getText().toString();
             String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
