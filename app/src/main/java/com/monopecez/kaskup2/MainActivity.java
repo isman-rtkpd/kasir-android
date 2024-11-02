@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
     public void clearContent(int num) {
         for (int i = 0; i < menuSize ; i++){
             qtyList[i] = num;
-            harTot.get(i).setText(num + " | " + (num * hargaList[i]));
+            harTot.get(i).setText(num + " | " + formatNumber(num * hargaList[i]));
         }
         calculateTotal();
     }
@@ -449,6 +449,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean printReceipt() throws InterruptedException {
+        printDummyReceipt();
+
         Log.d("TAG", "PRINTINGGGGGGG");
         if (this.mBluetoothSocket == null) {
             Log.d("TAG", "PRINTINGGGGGGG NULLLLL");
@@ -503,6 +505,19 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public void printDummyReceipt() {
+        String hargaTotal = totalText.getText().toString();
+        if (!hargaTotal.equals("0")) {
+            for (int i = 0; i < menuSize; i++) {
+                if (qtyList[i] > 0) {
+                    Log.d("PRINT TEXT",qtyList[i] + " x " + nameList[i] +" @" + formatNumber(hargaList[i]));
+                    Log.d("PRINT TEXT","" + formatNumber(hargaList[i] * qtyList[i]));
+                }
+            }
+        }
+        Log.d("PRINT TEXT", "TOTAL: " + hargaTotal);
+    }
+
     public void ReceiptBuilder(EscPos escpos, boolean first) throws IOException {
         String hargaTotal = totalText.getText().toString();
         Style rightJust = new Style().setJustification(EscPosConst.Justification.Right);
@@ -516,7 +531,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        escpos.writeLF(rightJust, "Total: " + "123000");
+        escpos.writeLF(rightJust, "Total: " + hargaTotal);
     }
 
     public void dialogClearReceipt() {
